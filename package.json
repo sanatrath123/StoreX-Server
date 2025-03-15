@@ -1,0 +1,21 @@
+{
+  "name": "05_serving-static-files",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongodb": "6.13",
+    "mongoose": "^8.12.1",
+    "react-router-dom": "^7.1.3"
+  }
+}
