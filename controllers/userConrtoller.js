@@ -38,8 +38,14 @@ export const SignupController = async (req, res,next)=>{
   export const LoginController = async (req,res)=>{
     const {email , password} = req.body 
   const userData =await userModels.findOne({email ,password}).lean()
+  const cookiesJson = {
+    id:userData._id.toString() , expire:Math.floor(Date.now()/1000 + 800).toString()
+  }
+  const key = 'Sanat1234@'
+  const signeture = crypto.createHash('sha256').update(JSON.stringify(cookiesJson)).update(key).digest('base64url')
   if(!userData)return res.status(400).json({message:"email and password dont match"})
-  res.cookie('uid', userData._id.toString() , { httpOnly:true , maxAge:7*24*60*60*1000, sameSite:'none', secure:true})
+    console.log("signeture",signeture,"end")
+  res.cookie('uid', Buffer.from(JSON.stringify({...cookiesJson, signeture})).toString("base64url") , { httpOnly:true , maxAge:7*24*60*60*1000, sameSite:'none', secure:true})
   res.status(200).json(userData)
   }
 
