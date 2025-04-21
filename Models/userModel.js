@@ -1,4 +1,5 @@
 import mongoose,{model, Schema} from "mongoose";
+import { type } from "os";
 
 const userSchema = new Schema({
     name: {
@@ -21,6 +22,9 @@ const userSchema = new Schema({
       },
       rootDirID: {
         type: Schema.Types.ObjectId,ref:"directoryDB"
+      },
+      emailVarified:{
+        type:Boolean , default:false
       }
 },{timestamps:true})
 
