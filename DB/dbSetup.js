@@ -14,7 +14,6 @@ const userCollection =await  db.command({
         required: [
           'name',
           'email',
-          'password',
           'rootDirID'
         ],
         properties: {

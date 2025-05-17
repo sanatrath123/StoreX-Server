@@ -10,7 +10,7 @@ const userSchema = new Schema({
       password: {
         type: String,
         minLength: 5,
-        required: [true, 'password is required'],
+       default:null
       },
       email: {
      type:String,
@@ -23,6 +23,13 @@ const userSchema = new Schema({
       rootDirID: {
         type: Schema.Types.ObjectId,ref:"directoryDB"
       },
+avatar:{
+type:String, default:null
+},
+GoogleSubID:{
+  type:String , default:null
+}
+,
       emailVarified:{
         type:Boolean , default:false
       }

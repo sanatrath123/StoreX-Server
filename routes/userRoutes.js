@@ -1,6 +1,6 @@
 import express from 'express'
 import AuthCheeck from '../middlewares/newAuth.js'
-import {SignupController,LoginController, GetUserData, Logout} from "../controllers/userConrtoller.js"
+import {SignupController,LoginController,GoogleOauth, GetUserData, Logout} from "../controllers/userConrtoller.js"
 import { VarificationEmail } from '../utils/EmailOtpVarification.js'
 import OtpSessionModel from '../Models/OtpSession.js'
 import userModels from '../Models/userModel.js'
@@ -11,6 +11,7 @@ router.post("/login", LoginController)
 router.post('/logout', AuthCheeck,Logout)
 //get the name and user email
 router.get('/profile',AuthCheeck,GetUserData )
+router.post("/gooleOauth",GoogleOauth)
 
 
 router.post('/generateOtp',AuthCheeck, async(req,res,next)=>{
