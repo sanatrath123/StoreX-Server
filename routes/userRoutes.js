@@ -1,9 +1,13 @@
 import express from 'express'
 import AuthCheeck from '../middlewares/newAuth.js'
-import {SignupController,LoginController,GoogleOauth, GetUserData, Logout} from "../controllers/userConrtoller.js"
+import {SignupController,LoginController,GoogleOauth, GetUserData, Logout, GetAllUser,LogoutUserByAdmin,DeleteUserByAdmin} from "../controllers/userConrtoller.js"
 import { VarificationEmail } from '../utils/EmailOtpVarification.js'
 import OtpSessionModel from '../Models/OtpSession.js'
 import userModels from '../Models/userModel.js'
+import SessionModel from '../Models/Sessions.js' 
+import {AdminCheeck} from '../middlewares/AdminCheeck.js'
+import SessionModel from '../Models/Sessions.js'
+import mongoose from 'mongoose'
 
 const router = express.Router()
 router.post("/signup", SignupController)
@@ -13,7 +17,13 @@ router.post('/logout', AuthCheeck,Logout)
 router.get('/profile',AuthCheeck,GetUserData )
 router.post("/gooleOauth",GoogleOauth)
 
+//admin routes
+router.get("/allUsers", AuthCheeck, AdminCheeck, GetAllUser)
+router.post("/AdminLogout", AuthCheeck, AdminCheeck,LogoutUserByAdmin)
+router.delete("/:userId/deleteUserAccount",AuthCheeck, AdminCheeck,DeleteUserByAdmin)
 
+
+//otp and verify email routes
 router.post('/generateOtp',AuthCheeck, async(req,res,next)=>{
 const {userData} = req
 if(userData?.emailVarified) return res.status(204)

@@ -32,6 +32,12 @@ GoogleSubID:{
 ,
       emailVarified:{
         type:Boolean , default:false
+      },
+      role:{
+        type:String , enum:["admin", "user", "maneger"], default:"user"
+      },
+      isDeleted:{
+        type:Boolean , default:false
       }
 },{timestamps:true})
 

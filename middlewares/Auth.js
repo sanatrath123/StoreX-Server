@@ -15,7 +15,6 @@ if(!signeture) return next(Error)
 const key = 'Sanat1234@'
 const hash = crypto.createHash('sha256').update(JSON.stringify(cookiesData)).update(key).digest('base64url')
 if(hash != signeture){
-    console.log('hacker')
   return LogoutFn(res)
 }
 

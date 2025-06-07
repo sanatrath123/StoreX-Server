@@ -11,36 +11,34 @@ const userCollection =await  db.command({
     [command]:"userDB" , 
     validator:{
       $jsonSchema: {
-        required: [
-          'name',
-          'email',
-          'rootDirID'
-        ],
-        properties: {
-          _id: {
-            bsonType: 'objectId',
-            description: 'invalid id'
-          },
-          name: {
-            bsonType: 'string',
-            description: 'invalid name',
-            minimum: 4
-          },
-          password: {
-            bsonType: 'string',
-            minimum: 5,
-            description: 'invalid password'
-          },
-          email: {
-            bsonType: 'string',
-            description: 'invalid email'
-          },
-          rootDirID: {
-            bsonType: 'objectId',
-            description: 'invalid rootdirId'
-          }
-        },
-        additionalProperties: false
+          $jsonSchema: {
+            required: [
+              'name',
+              'email',
+              'rootDirID'
+            ],
+            properties: {
+              _id: {
+                bsonType: 'objectId',
+                description: 'invalid id'
+              },
+              name: {
+                bsonType: 'string',
+                description: 'invalid name',
+                minLength: 3
+              },
+              email: {
+                bsonType: 'string',
+                description: 'invalid email'
+              },
+              rootDirID: {
+                bsonType: 'objectId',
+                description: 'invalid rootdirId'
+              }
+            },
+            additionalProperties: true
+          
+        }
       }
       },
       
@@ -48,6 +46,55 @@ const userCollection =await  db.command({
       validationAction:"error"
 }
 )
+// const userCollection =await  db.command({
+//     [command]:"userDB" , 
+//     validator:{
+//       $jsonSchema: {
+//         required: [
+//           'name',
+//           'email',
+//           'rootDirID'
+//         ],
+//         properties: {
+//           _id: {
+//             bsonType: 'objectId',
+//             description: 'invalid id'
+//           },
+//           name: {
+//             bsonType: 'string',
+//             description: 'invalid name',
+//             minimum: 4
+//           },
+//           password: {
+//             bsonType: 'string',
+//             minimum: 5,
+//             description: 'invalid password'
+//           },
+//           email: {
+//             bsonType: 'string',
+//             description: 'invalid email',
+//           },
+//           rootDirID: {
+//             bsonType: 'objectId',
+//             description: 'invalid rootdirId'
+//           },
+//           role:{
+//             bsonType:'string',
+//             enum:["admin","user","maneger"],
+//             description:"invalid role"
+//           },
+//           isDeleted:{
+//             bsonType:'bool', default:false
+//           }
+//         },
+//         additionalProperties: true
+//       }
+//       },
+      
+//       validationLevel:"strict",
+//       validationAction:"error"
+// }
+// )
 
 //directory collection 
 const directoryCollection =await  db.command({

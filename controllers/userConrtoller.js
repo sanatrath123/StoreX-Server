@@ -83,7 +83,50 @@ await SessionModel.deleteOne({_id:sessionID})
     res.clearCookie('sid' , { sameSite:'none', secure:true} )
     res.status(200).json({message:"logout successfully happens"})
   }
-  
+
+  //get all user 
+  export const GetAllUser = async(req,res,next)=>{
+    const allSessions = (await SessionModel.find().lean()).map((ses)=>ses.userId.toString())
+    const allUser = await userModels.find({},{password:0,GoogleSubID:0}).lean()
+    const userData = allUser.map((user)=>{ return {...user, isLogedIn:allSessions.includes(user._id.toString())}})
+    return res.status(200).json(userData)
+}
+
+//looged out by admin
+export const LogoutUserByAdmin = async(req,res,next)=>{
+  const {userId} = req.body
+try {
+  const data = await SessionModel.deleteMany({userId})
+  if(data.deletedCount) return res.status(200).json({message:"user logged out"})
+  if(!data.acknowledged) return res.status(404).json({err:"user session does not exist"})
+} catch (error) {
+  console.log("error while admin logout a user", error)
+  next(new Error)
+}
+}
+
+//delete the user account by admin
+export const DeleteUserByAdmin= async(req,res)=>{
+  //this is soft deletion of user
+  const {userId} = req.params 
+  const {userData} = req
+  if(userData._id == userId) return res.status(403).json({message:"user dont have the permission"})
+      const mongooseSession =await  mongoose.startSession()
+  mongooseSession.startTransaction()
+  try {
+      const data = await userModels.updateOne({_id:userId}, {isDeleted:true})
+  if(!data.modifiedCount)return res.status(404).json({message:"user deleted request unsusessfull"})
+       await SessionModel.deleteMany({userId})
+  await mongooseSession.commitTransaction()
+  return res.status(200).json({message:"user account deleted"})
+  } catch (error) {
+  console.log("error while delete the user account", error)
+  await mongooseSession.abortTransaction()
+  return res.status(404).json({err:"user account not deleted"})
+  }finally{
+      await mongooseSession.endSession()
+  }
+  }
 
   //create new Account for user
   async function CreateNewAccount(newUserData,rootDirData) {
