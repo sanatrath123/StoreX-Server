@@ -5,7 +5,8 @@ import directoryRouter from "./routes/directoryRoutes.js"
 import fileRouter from "./routes/fileRoutes.js"
 import userRouter from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser"
-
+import { ConnectRedis } from "./DB/redisDB.js"
+const redisClient = await ConnectRedis()
 //connect with db
 import "./Models/db.js"
 

@@ -95,3 +95,5 @@ cute_operation.js:75:16)
 #set the limit on the storage for the user
 
 #create a public and private folder and implement the share fetures 
+
+#show the directory details like total size of the directory and how many files inside that directory, by using redis caching , this is usecase to show computed data vai cacheing

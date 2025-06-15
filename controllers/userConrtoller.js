@@ -4,7 +4,8 @@ import directoryModel from "../Models/directoryModel.js"
 import bcrypt from 'bcrypt'
 import SessionModel from '../Models/Sessions.js'
 import {VarifyIdToken} from "../utils/googleOauth.js"
-
+import redisClient from '../DB/redisDB.js'
+import {randomBytes} from 'crypto'
 
 export const SignupController = async (req, res,next)=>{
   const {name , email , password} = req.body
@@ -30,8 +31,10 @@ export const SignupController = async (req, res,next)=>{
 const isValidPswd= await bcrypt.compare(password , userData?.password)
   if(!isValidPswd) return res.status(409).json({err:"invalid credential"})
     //find the sessions exist
- const data = await CreateSession(userData?._id)
- return data ? res.status(200).json({msg:"user Loggeg in"}) : res.status(404).json({err:"error while login"})
+ const sesID = await CreateSession(userData?._id)
+ if(!sesID)  return  res.status(404).json({err:"error while login"})
+ res.cookie('sid', Buffer.from(sesID, 'utf-8').toString("base64url") , { httpOnly:true , maxAge:7*24*60*60*1000, sameSite:'none', secure:true, signed: true})
+ return  res.status(200).json({msg:"user Loggeg in"}) 
   } catch (error) {
     console.log("error while login", error)
     next(new Error)
@@ -79,7 +82,7 @@ if(sesID) {
   export const Logout=async (req,res)=>{
     const {sid} = req.signedCookies
     const sessionID = Buffer.from(sid, "base64url").toString()
-await SessionModel.deleteOne({_id:sessionID})
+    await redisClient.json.del(`session:${sessionID}`, "$")
     res.clearCookie('sid' , { sameSite:'none', secure:true} )
     res.status(200).json({message:"logout successfully happens"})
   }
@@ -96,9 +99,9 @@ await SessionModel.deleteOne({_id:sessionID})
 export const LogoutUserByAdmin = async(req,res,next)=>{
   const {userId} = req.body
 try {
-  const data = await SessionModel.deleteMany({userId})
-  if(data.deletedCount) return res.status(200).json({message:"user logged out"})
-  if(!data.acknowledged) return res.status(404).json({err:"user session does not exist"})
+  const data = await redisClient.json.del(`session:${userId}`, "$")
+  if(data) return res.status(200).json({message:"user logged out"})
+ return res.status(404).json({err:"user session does not exist"})
 } catch (error) {
   console.log("error while admin logout a user", error)
   next(new Error)
@@ -153,19 +156,21 @@ export const DeleteUserByAdmin= async(req,res)=>{
   return true
   }
 
+      // const prevSessions = await SessionModel.find({userId})
+    // if(prevSessions.length>2){
+    //  await prevSessions[0].deleteOne()
+    // }
 
    //create session function for login controller
  async function CreateSession(userId,req) {
+  const deviseInfo = parseUserAgent(req.headers['user-agent'])
+  const sessionId = randomBytes(16).toString("hex")
+  const userSession = {userId, deviseInfo , id:sessionId}
   try {
-    const prevSessions = await SessionModel.find({userId})
-    if(prevSessions.length>2){
-     await prevSessions[0].deleteOne()
-    }
-  const userSession = new SessionModel({userId})
-    const deviseInfo = parseUserAgent(req.headers['user-agent'])
-    userSession.addNewDevise(deviseInfo)
-    await userSession.save()
-    return userSession._id.toString()
+    //do the number devises logged in
+  await redisClient.json.set(`session:${sessionId}`, "$" , userSession )
+  await redisClient.expire(`session:${sessionId}`,60*60*24)
+  return sessionId
   } catch (error) {
     console.log("error while Create session function", error)
     return false
