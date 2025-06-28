@@ -80,7 +80,7 @@ const userCollection =await  db.command({
 //           },
 //           role:{
 //             bsonType:'string',
-//             enum:["admin","user","maneger"],
+//             enum:["admin","user","manager"],
 //             description:"invalid role"
 //           },
 //           isDeleted:{

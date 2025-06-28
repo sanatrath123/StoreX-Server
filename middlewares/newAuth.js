@@ -10,7 +10,7 @@ try {
 const sessionID = Buffer.from(sid, "base64url").toString()
 const sessionData = await redisClient.json.get(`session:${sessionID}`)
 if(!sessionData?.id) return res.status(409).json({err:"session expired"})
-if(!userData?.userId) return res.status(409).json({err:"user dont exist"})
+if(!sessionData?.userId) return res.status(409).json({err:"user dont exist"})
 req.userData = sessionData
 next()
 } catch (error) {

@@ -1,6 +1,8 @@
 import {createClient} from 'redis'
 
-const redisClient = createClient()
+const redisClient = createClient({
+    password:'52141239@'
+})
 
 export default redisClient
 

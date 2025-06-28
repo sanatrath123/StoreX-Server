@@ -9,11 +9,11 @@ const parentId = req.headers?.parentid || userData.rootDirID
 
 const name = req.body.newName || "New Folder"
 
-const isParent = await directoryModel.find({_id:parentId , userId:userData._id})
+const isParent = await directoryModel.find({_id:parentId , userId:userData.userId})
 if(!isParent.length) return res.status(401).json({err:"user is unauthorized for creating here"})
 
 try {
-  await directoryModel.insertOne({name:name , parent:parentId, userId:userData._id})
+  await directoryModel.insertOne({name:name , parent:parentId, userId:userData.userId})
 return res.status(201).json({message:"Directory created succesfully"})
 } catch (error) {
   console.log("error while creting the directory", error)
@@ -31,11 +31,10 @@ return res.status(201).json({message:"Directory created succesfully"})
 export const GetDirData = async (req,res,next)=>{
   const userData = req.userData
 const dirId = req.params.directoryId || userData.rootDirID
-const dirData = await directoryModel.findOne({_id:dirId , userId:userData._id}).lean()
-
+const dirData = await directoryModel.findOne({_id:dirId , userId:userData.userId}).lean()
 if(!dirData) return res.status(401).json({msg:"no drirectory exist"})
 try {
-  const childDirData = await directoryModel.find({parent:dirId, userId:userData._id},'name').lean()
+  const childDirData = await directoryModel.find({parent:dirId, userId:userData.userId},'name').lean()
   const FileData = await FileModel.find({parent:dirId},"name extension").lean()
   const formatedDirData = childDirData.map(({_id , name})=>({id:_id ,name}))
   const formatedFileData = FileData.map(({_id , name, extension})=>({id:_id , name , extension}))
@@ -53,7 +52,7 @@ export const RenameDir = async (req,res,next)=>{
    const dirId =   req.params.directoryId
    const newName = req.body.newName
    try {
-      await directoryModel.find({_id:dirId, userId:userData._id} , {name:newName}).lean()
+      await directoryModel.find({_id:dirId, userId:userData.userId} , {name:newName}).lean()
       res.json({message:"file renamed succesfully"})
    } catch (error) {
       res.status(500).json({message:"error while renaming the directory"})

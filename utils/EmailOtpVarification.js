@@ -12,6 +12,7 @@ export const VarificationEmail = async (userEmail)=>{
         html: `<h1>hello world and ur otp is ${userOtp}</h1>`,
       })
       if(result.error)  return  false
+      //TODO: implement redis
        const otpDoc =await OtpSessionModel.create({otp:userOtp, userEmail})
        return otpDoc?._id
 }

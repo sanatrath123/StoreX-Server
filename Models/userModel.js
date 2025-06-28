@@ -34,7 +34,7 @@ GoogleSubID:{
         type:Boolean , default:false
       },
       role:{
-        type:String , enum:["admin", "user", "maneger"], default:"user"
+        type:String , enum:["admin", "user", "manager", "owner"], default:"user"
       },
       isDeleted:{
         type:Boolean , default:false

@@ -1,13 +1,10 @@
 import express from 'express'
 import AuthCheeck from '../middlewares/newAuth.js'
-import {SignupController,LoginController,GoogleOauth, GetUserData, Logout, GetAllUser,LogoutUserByAdmin,DeleteUserByAdmin} from "../controllers/userConrtoller.js"
+import {SignupController,LoginController,GoogleOauth, GetUserData, Logout, GetAllUser,LogoutUserByAdmin,DeleteUserByAdmin,PermanetDelete,SoftDeletedUsers,recoverUserAccount} from "../controllers/userConrtoller.js"
 import { VarificationEmail } from '../utils/EmailOtpVarification.js'
 import OtpSessionModel from '../Models/OtpSession.js'
 import userModels from '../Models/userModel.js'
-import SessionModel from '../Models/Sessions.js' 
 import {AdminCheeck} from '../middlewares/AdminCheeck.js'
-import SessionModel from '../Models/Sessions.js'
-import mongoose from 'mongoose'
 
 const router = express.Router()
 router.post("/signup", SignupController)
@@ -21,7 +18,9 @@ router.post("/gooleOauth",GoogleOauth)
 router.get("/allUsers", AuthCheeck, AdminCheeck, GetAllUser)
 router.post("/AdminLogout", AuthCheeck, AdminCheeck,LogoutUserByAdmin)
 router.delete("/:userId/deleteUserAccount",AuthCheeck, AdminCheeck,DeleteUserByAdmin)
-
+router.delete('/:userId/hard', AuthCheeck ,AdminCheeck, PermanetDelete )
+router.put('/:userId/recoverDeletedUser', AuthCheeck,AdminCheeck , recoverUserAccount)
+router.get('/softDeletedUsers', AuthCheeck ,AdminCheeck ,SoftDeletedUsers )
 
 //otp and verify email routes
 router.post('/generateOtp',AuthCheeck, async(req,res,next)=>{
@@ -30,7 +29,6 @@ if(userData?.emailVarified) return res.status(204)
 try {
     const otpId = await VarificationEmail(userData?.email)
 if(!otpId) return res.status(404).json({err:"can't generate otp"}) 
-    console.log("yo")
 return res.status(200).json({msg:"Otp sent to ur email"})
 } catch (error) {
     console.log("error while generating otp", error)
@@ -56,4 +54,32 @@ next(new Error)
    }
 })
 
+//user , manager , admin , owner
+router.put("/:userId/changeRole/:assignRole", AuthCheeck , AdminCheeck , async(req,res,next)=>{
+   const {userId,assignRole}= req.params 
+   const CurrentUserData = req?.userData
+if(userId == CurrentUserData?._id) return res.status(403).json({err:"u can't change ur own role"})
+const isAllowed = isAllowedToRoleChange(CurrentUserData?.role , assignRole)
+//if the user is manager
+if(isAllowed){
+   await userModels.updateOne({isDeleted:false , _id:userId}, {role:assignRole})
+    return res.status(200).json({msg:`${assignRole} assigned`})
+}
+return res.status(404).json({err:"not allowed assigned new role to the user"})
+
+})
+
+
+//cheeck the user is allowed to change that specific role or not
+const isAllowedToRoleChange =  (currentUserRole , allowRole)=>{
+    if(allowRole!== "manager" && allowRole!=="admin") return false
+if(currentUserRole=="manager" && allowRole=="manager") return true
+if(currentUserRole!=='manager') return true
+return false
+}
+
+
+
 export default router
+
+

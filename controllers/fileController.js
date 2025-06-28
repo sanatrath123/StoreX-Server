@@ -44,7 +44,7 @@ export const GetFile = async (req, res,next) => {
         try {
             const fileData =await fileModel.findById(fileId).populate({path:"parent", select:"userId -_id"})
 
-    if(String(userData._id) !== String(fileData.parent.userId)){
+    if(String(userData.userId) !== String(fileData.parent.userId)){
     return  res.status(401).json({error:"you are not allowed to open this file"})
     }
     
@@ -77,7 +77,7 @@ try {
         path:"parent" , select:"userId"
     })
 console.log( String(parentDirClient))
-if( String(fileData.parent._id) !== String(parentDirClient) ||  String(fileData.parent.userId) !== String(userData._id) ){
+if( String(fileData.parent._id) !== String(parentDirClient) ||  String(fileData.parent.userId) !== String(userData.userId) ){
     return res.status(401).json({error:"you are not allowed to rename from some other folder"})
 }
 try {
@@ -102,7 +102,7 @@ export const deleteFile = async (req,res,next)=>{
     const parentDirId = req.headers.parentid || userData.rootDirID
 
 try {
-    const dirData =await directoryModel.findOne({_id:parentDirId, userId:userData._id})
+    const dirData =await directoryModel.findOne({_id:parentDirId, userId:userData.userId})
     if(!dirData?._id){
      return  res.status(401).json({error:"you are not allowed to open this file"})
     }
